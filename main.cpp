@@ -6,7 +6,7 @@
 
 static const long Num_To_Add = 10000000;
 static const double Scale = 10.0 / RAND_MAX;
-//Method to calulate sum of a randomly populated array sequentially
+//Method to calulat sum of a randomly populated array sequentially
 long add_serial(const char *numbers) {
     long sum = 0;
     for (long i = 0; i < Num_To_Add ; i++) {
@@ -14,13 +14,12 @@ long add_serial(const char *numbers) {
     }
     return sum;
 }
-
+long sum;
 //Method to calulate sum of a randomly populated array parallel
 long add_parallel(const char *numbers) {
-    long sum = 0;
-    int MaxValue=4;
-    for (long i = 0; i <MaxValue ; i++) {
-        sum += RAND_MAX;
+#pragma omp for reduction(+:sum)
+   for (long i = 0; i < Num_To_Add ; i++) {
+        sum += numbers[i];
     }
     return sum;
 }
@@ -28,6 +27,7 @@ long add_parallel(const char *numbers) {
 int main() {
     char *numbers = static_cast<char *>(malloc(sizeof(long) * Num_To_Add));
 
+    struct timeval start, end;
     long chunk_size = Num_To_Add / omp_get_max_threads();
 #pragma omp parallel num_threads(omp_get_max_threads())
     {
@@ -39,8 +39,6 @@ int main() {
             numbers[i] = (char) (rand_r(&seed) * Scale);
         }
     }
-
-    struct timeval start, end;
 
     printf("Timing sequential...\n");
     gettimeofday(&start, NULL);
