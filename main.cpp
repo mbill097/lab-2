@@ -24,7 +24,7 @@ long add_parallel(const char *numbers) {
     }
     return sum;
 }
-
+//Main method
 int main() {
     char *numbers = static_cast<char *>(malloc(sizeof(long) * Num_To_Add));
 
