@@ -8,9 +8,12 @@
 #define MAX 30
 // maximum number of threads
 #define MAX_THREAD 4
-static const long Array_size = 3000;
+static const long Array_size = 30;
+static const long Num_To_Add = 1000000000;
+static const double Scale = 10.0 / RAND_MAX;
+
 //Method to calulate sum of a randomly populated array sequentially
-long add_serial(const int *numbers) {
+long add_serial(const char *numbers) {
 int sum=0;
     for (long i = 0; i < Array_size ; i++) {
             sum += numbers[i];
@@ -19,13 +22,14 @@ int sum=0;
 }
 
 //Method to calulate sum of a randomly populated array parallel
-long int add_parallel(const int *numbers) {
+long int add_parallel(const char *numbers) {
     long int inntersum=0,sum = 0;
 #pragma omp parallel num_threads(3)
     {
         int start, Psize= 3;
         int singleThread ,end;
         singleThread= Array_size/Psize;
+
 
 #pragma omp for
         for (long start = 0; start < Array_size ; start++) {
@@ -42,12 +46,20 @@ long int add_parallel(const int *numbers) {
 //Main metho
 int main() {
      struct timeval start, end;
-    // Code to generate Ramdom number and store into array.
-    int numbers[Array_size], i;
-    for(i = 0; i <  Array_size; i++)
+
+    char *numbers = (char*) malloc(sizeof(long) * Num_To_Add);
+    long chunk_size = Num_To_Add / omp_get_max_threads();
+#pragma omp parallel num_threads(omp_get_max_threads())
     {
-        numbers[i] = (rand() % 100)+1;
+        int p = omp_get_thread_num();
+        unsigned int seed = (unsigned int) time(NULL) + (unsigned int) p;
+        long chunk_start = p * chunk_size;
+        long chunk_end = chunk_start + chunk_size;
+        for (long i = chunk_start; i < chunk_end; i++) {
+            numbers[i] = (char) (rand_r(&seed) * Scale);
+        }
     }
+
 
     printf("Timing sequential...\n");
     gettimeofday(&start, NULL);
