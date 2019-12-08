@@ -8,7 +8,7 @@
 #define MAX 30
 // maximum number of threads
 #define MAX_THREAD 4
-static const long Array_size = 30;
+static const long Array_size = 3000;
 static const long Num_To_Add = 1000000000;
 static const double Scale = 10.0 / RAND_MAX;
 
